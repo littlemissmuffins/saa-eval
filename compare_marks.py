@@ -8,7 +8,7 @@ Both CSVs need columns whose names contain 'annot', 'start' and 'end' (UTC ISO t
 """
 import argparse
 import statistics
-from saa_eval import load_intervals, match_events
+from saa_eval import load_intervals, match_events, normalize_name
 
 ALIASES = {"martin": "martin kakona"}
 
@@ -23,8 +23,12 @@ def main():
     a = ap.parse_args()
     ref_all = load_intervals(a.ref_csv, ALIASES)
     pred_all = load_intervals(a.pred_file or a.ref_csv, ALIASES)
-    ref = ref_all[a.ref.casefold()]
-    pred = pred_all[a.pred.casefold()]
+    ref_key, pred_key = normalize_name(a.ref, ALIASES), normalize_name(a.pred, ALIASES)
+    for key, table, label in ((ref_key, ref_all, "--ref"), (pred_key, pred_all, "--pred")):
+        if key not in table:
+            ap.error(f"{label} annotator {key!r} not found; available: {sorted(table)}")
+    ref = ref_all[ref_key]
+    pred = pred_all[pred_key]
     res = match_events(ref, pred, tol_s=a.tol_s)
     print(f"reference passes: {len(ref)}  compared passes: {len(pred)}  tolerance: +/-{a.tol_s:.0f} s")
     print(f"matched: {res['tp']}  extra (false positive): {res['fp']}  missed (false negative): {res['fn']}")
@@ -39,3 +43,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
