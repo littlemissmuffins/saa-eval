@@ -207,6 +207,12 @@ def match_events(ref, pred, tol_s=60.0, matching="greedy"):
     """
     if matching not in ("greedy", "maximum"):
         raise ValueError(f"matching must be 'greedy' or 'maximum', got {matching!r}")
+    if not (isinstance(tol_s, (int, float)) and math.isfinite(tol_s) and tol_s >= 0):
+        raise ValueError(f"tol_s must be a finite number >= 0, got {tol_s!r}")
+    for label, events in (("ref", ref), ("pred", pred)):
+        for k, ev in enumerate(events):
+            if len(ev) != 2 or not (math.isfinite(ev[0]) and math.isfinite(ev[1])) or ev[0] > ev[1]:
+                raise ValueError(f"{label}[{k}] must be a finite (start, end) with start <= end, got {tuple(ev)!r}")
     cands = []
     for i, r in enumerate(ref):
         widened = (r[0] - tol_s, r[1] + tol_s)

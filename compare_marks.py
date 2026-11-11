@@ -20,6 +20,8 @@ def main():
     ap.add_argument("--ref", required=True, help="reference annotator name")
     ap.add_argument("--pred", required=True, help="predicted/compared annotator name")
     ap.add_argument("--tol-s", type=float, default=60.0)
+    ap.add_argument("--matching", choices=("greedy", "maximum"), default="greedy",
+                    help="greedy (default, historical) or maximum cardinality")
     a = ap.parse_args()
     ref_all = load_intervals(a.ref_csv, ALIASES)
     pred_all = load_intervals(a.pred_file or a.ref_csv, ALIASES)
@@ -29,8 +31,8 @@ def main():
             ap.error(f"{label} annotator {key!r} not found; available: {sorted(table)}")
     ref = ref_all[ref_key]
     pred = pred_all[pred_key]
-    res = match_events(ref, pred, tol_s=a.tol_s)
-    print(f"reference passes: {len(ref)}  compared passes: {len(pred)}  tolerance: +/-{a.tol_s:.0f} s")
+    res = match_events(ref, pred, tol_s=a.tol_s, matching=a.matching)
+    print(f"reference passes: {len(ref)}  compared passes: {len(pred)}  tolerance: +/-{a.tol_s:.0f} s  matching: {a.matching}")
     print(f"matched: {res['tp']}  extra (false positive): {res['fp']}  missed (false negative): {res['fn']}")
     print(f"precision {res['precision']:.3f}  recall {res['recall']:.3f}  F1 {res['f1']:.3f}")
     if res["matches"]:

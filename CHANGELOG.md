@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.3
+Prompted by an independent review of v0.2 by Lissandra Kruse Fuganti (matching selector and input checks).
+
+- `match_events` now raises `ValueError` for a negative, NaN or infinite `tol_s`, and for reversed or non finite intervals. Zero length intervals are still allowed. Valid inputs give identical results.
+- `compare_marks.py` has `--matching {greedy,maximum}` (default greedy) and prints the mode used.
+- 3 new tests (21 in total). Still open: tie breaking by overlap inside the maximum mode (offered by Abhi Singh).
+
 ## v0.2
 Patch by Abhi Singh, applied from the reviewed proposal against 96993dc. Only synthetic tests were run for this patch.
 
